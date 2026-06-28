@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1ª Evaluación — Módulo de Redes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #171b26;
+    --surface2: #1e2333;
+    --border: #2a2f42;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --success: #34d399;
+    --success-dim: rgba(52,211,153,0.12);
+    --danger: #f87171;
+    --danger-dim: rgba(248,113,113,0.12);
+    --text: #e8eaf2;
+    --text-muted: #6b7494;
+    --text-dim: #4a5070;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --radius: 10px;
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+  body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; }
+
+  header { width: 100%; max-width: 680px; margin-bottom: 2.5rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.25rem; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+  .header-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  .progress-wrap { width: 100%; max-width: 680px; margin-bottom: 1.5rem; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-family: var(--mono); }
+  .progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+  .mode-row { display: flex; gap: 8px; width: 100%; max-width: 680px; margin-bottom: 1.5rem; }
+  .mode-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 12px; font-family: var(--sans); cursor: pointer; transition: all 0.15s; }
+  .mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mode-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
+  .q-card { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-bottom: 1rem; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .q-number { font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--accent-dim); padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 1rem; }
+  .q-text { font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.5; margin-bottom: 1.25rem; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; cursor: pointer; font-size: 14px; color: var(--text); text-align: left; width: 100%; font-family: var(--sans); transition: border-color 0.15s, background 0.15s; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-dim); }
+  .opt:disabled { cursor: default; }
+  .opt-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 20px; font-weight: 500; flex-shrink: 0; }
+  .opt-text { flex: 1; }
+  .opt-icon { margin-left: auto; font-size: 15px; flex-shrink: 0; font-weight: 600; }
+  .opt.correct { border-color: var(--success); background: var(--success-dim); }
+  .opt.correct .opt-label { color: var(--success); }
+  .opt.correct .opt-icon::after { content: '✓'; color: var(--success); }
+  .opt.wrong { border-color: var(--danger); background: var(--danger-dim); }
+  .opt.wrong .opt-label { color: var(--danger); }
+  .opt.wrong .opt-icon::after { content: '✗'; color: var(--danger); }
+
+  .explanation { margin-top: 12px; padding: 10px 14px; background: var(--surface2); border-radius: var(--radius); border-left: 2px solid var(--accent); font-size: 13px; color: var(--text-muted); line-height: 1.55; display: none; }
+  .explanation.show { display: block; }
+
+  .nav-row { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 680px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text); font-size: 14px; font-family: var(--sans); cursor: pointer; transition: all 0.15s; }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .score-info { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+  #q-container { width: 100%; max-width: 680px; }
+
+  .results { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2.5rem; text-align: center; display: none; }
+  .results.show { display: block; }
+  .results-emoji { font-size: 48px; margin-bottom: 1rem; }
+  .results-score { font-family: var(--mono); font-size: 52px; font-weight: 500; color: var(--accent); line-height: 1; }
+  .results-sub { font-size: 14px; color: var(--text-muted); margin-top: 6px; margin-bottom: 2rem; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem; }
+  .stat-box { background: var(--surface2); border-radius: var(--radius); padding: 16px; }
+  .stat-val { font-family: var(--mono); font-size: 28px; font-weight: 500; }
+  .stat-val.ok { color: var(--success); }
+  .stat-val.ko { color: var(--danger); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .restart-btn { padding: 11px 28px; background: var(--accent); border: none; border-radius: var(--radius); color: #fff; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: opacity 0.15s; }
+  .restart-btn:hover { opacity: 0.85; }
+  .review { margin-top: 2rem; text-align: left; }
+  .review-title { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); }
+  .review-item { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+  .review-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .review-a { font-size: 12px; margin-bottom: 3px; }
+  .review-a.ko { color: var(--danger); }
+  .review-a.ok { color: var(--success); }
+  .review-exp { font-size: 12px; color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 20px; }
+    .q-text { font-size: 15px; }
+    .results-score { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="../index.html">← Volver al índice</a>
+  <div class="header-tag">1ª Evaluación</div>
+  <h1>Fundamentos de <span>redes</span></h1>
+  <p class="subtitle">130 preguntas · Redes, OSI/TCP, dispositivos y Cisco IOS</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="prog-label">0 de 100 respondidas</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div class="mode-row">
+  <button class="mode-btn active" id="btn-seq" onclick="setMode('seq')">Secuencial</button>
+  <button class="mode-btn" id="btn-rnd" onclick="setMode('rnd')">Orden aleatorio</button>
+</div>
+
+<div id="q-container"></div>
+
+<div class="nav-row" id="nav-row">
+  <button class="nav-btn" id="btn-prev" onclick="go(-1)" disabled>← Anterior</button>
+  <span class="score-info" id="score-info"></span>
+  <button class="nav-btn" id="btn-next" onclick="go(1)">Siguiente →</button>
+</div>
+
+<div class="results" id="results">
+  <div class="results-emoji" id="res-emoji"></div>
+  <div class="results-score" id="res-score"></div>
+  <div class="results-sub" id="res-sub"></div>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-val ok" id="res-ok"></div><div class="stat-lbl">Correctas</div></div>
+    <div class="stat-box"><div class="stat-val ko" id="res-ko"></div><div class="stat-lbl">Incorrectas</div></div>
+  </div>
+  <button class="restart-btn" onclick="restart()">Repetir test</button>
+  <div class="review" id="review"></div>
+</div>
+
+<script>
+const QS = [
+  { q: "¿Qué es una red de ordenadores?", opts: ["Un conjunto de ordenadores conectados para compartir información y recursos.", "Un único ordenador conectado a Internet.", "Un sistema operativo de comunicaciones."], correct: 0, exp: "Una red de ordenadores permite compartir información, aplicaciones, servicios y recursos entre distintos equipos." },
+  { q: "¿Cuál fue uno de los acontecimientos que impulsó la aparición de las redes de ordenadores?", opts: ["La aparición del IBM PC.", "La llegada de los teléfonos móviles.", "La creación de Bluetooth."], correct: 0, exp: "La aparición del IBM PC en 1981 y los ordenadores clónicos favorecieron la expansión de las redes." },
+  { q: "Antes de popularizarse las redes predominaba el modelo...", opts: ["Distribuido.", "Centralizado.", "Cliente-servidor."], correct: 1, exp: "Inicialmente la informática estaba basada en un modelo centralizado con un ordenador principal." },
+  { q: "¿Cuál NO es una ventaja de una red?", opts: ["Compartir impresoras.", "Compartir conexión a Internet.", "Aumentar la memoria RAM de todos los equipos."], correct: 2, exp: "Una red permite compartir recursos, pero no aumenta físicamente la memoria RAM de los equipos." },
+  { q: "¿Qué significa LAN?", opts: ["Local Area Network.", "Large Area Network.", "Long Access Network."], correct: 0, exp: "Una LAN es una red de área local utilizada en hogares, oficinas o centros educativos." },
+  { q: "Una red PAN corresponde a...", opts: ["Una red mundial.", "Una red personal.", "Una red metropolitana."], correct: 1, exp: "Una PAN conecta dispositivos personales como móviles, auriculares o portátiles." },
+  { q: "¿Qué tipo de red cubre una ciudad?", opts: ["WAN.", "MAN.", "PAN."], correct: 1, exp: "Una MAN conecta varias LAN dentro de una misma ciudad o área metropolitana." },
+  { q: "Una WAN se caracteriza por...", opts: ["Cubrir una habitación.", "Cubrir una ciudad.", "Cubrir grandes distancias."], correct: 2, exp: "Las WAN interconectan redes situadas en diferentes ciudades o países." },
+  { q: "La topología física describe...", opts: ["Cómo viajan los datos.", "Cómo están conectados físicamente los dispositivos.", "Las direcciones IP."], correct: 1, exp: "La topología física representa el cableado y las conexiones reales entre equipos." },
+  { q: "La topología lógica indica...", opts: ["La forma en la que circulan los datos.", "El tipo de cable utilizado.", "La posición física de los equipos."], correct: 0, exp: "Describe cómo la red transmite la información entre los nodos." },
+  { q: "En comunicación símplex...", opts: ["Se transmite en ambos sentidos simultáneamente.", "Solo existe un sentido de transmisión.", "Ambos equipos hablan alternativamente."], correct: 1, exp: "En una comunicación símplex solo un dispositivo transmite y el otro recibe." },
+  { q: "El modo semidúplex permite...", opts: ["Comunicación simultánea.", "Comunicación en ambos sentidos, pero no al mismo tiempo.", "Comunicación únicamente en un sentido."], correct: 1, exp: "En half-duplex ambos dispositivos pueden transmitir, pero nunca simultáneamente." },
+  { q: "El modo dúplex completo permite...", opts: ["Comunicación simultánea en ambos sentidos.", "Comunicación únicamente de recepción.", "Comunicación alterna."], correct: 0, exp: "Full-duplex permite enviar y recibir datos al mismo tiempo." },
+  { q: "¿Cuál de los siguientes es un medio guiado?", opts: ["WiFi.", "Cable de cobre.", "Radio."], correct: 1, exp: "Los medios guiados utilizan un soporte físico como cobre o fibra óptica." },
+  { q: "¿Cuál es un medio no guiado?", opts: ["Fibra óptica.", "Cable coaxial.", "WiFi."], correct: 2, exp: "En los medios no guiados la señal viaja por el aire mediante ondas electromagnéticas." },
+  { q: "El ancho de banda representa...", opts: ["La velocidad real medida.", "La capacidad máxima de transmisión.", "El tamaño de los paquetes."], correct: 1, exp: "Es la capacidad máxima disponible para transmitir información." },
+  { q: "La tasa de transferencia es...", opts: ["La velocidad real en un momento determinado.", "El máximo teórico.", "El tamaño de la memoria."], correct: 0, exp: "Es la velocidad efectiva medida durante la transmisión." },
+  { q: "Un byte equivale a...", opts: ["2 bits.", "4 bits.", "8 bits."], correct: 2, exp: "Ocho bits forman un byte." },
+  { q: "Una señal analógica...", opts: ["Tiene valores continuos.", "Solo puede valer 0 o 1.", "Siempre utiliza fibra óptica."], correct: 0, exp: "Las señales analógicas pueden adoptar infinitos valores dentro de un intervalo." },
+  { q: "Una señal digital...", opts: ["Tiene valores continuos.", "Tiene valores discretos o finitos.", "No necesita codificación."], correct: 1, exp: "Las señales digitales utilizan niveles discretos, normalmente 0 y 1." },
+  { q: "Cuando el canal es analógico debemos...", opts: ["Codificar.", "Modular.", "Encapsular."], correct: 1, exp: "La modulación adapta la información al medio analógico." },
+  { q: "Cuando el canal es digital debemos...", opts: ["Modular.", "Codificar.", "Multiplexar."], correct: 1, exp: "La codificación adapta la información para su transmisión digital." },
+  { q: "En el modelo de comunicación de datos, el transmisor...", opts: ["Genera los datos.", "Transforma y adapta los datos a la señal.", "Recibe la información."], correct: 1, exp: "El transmisor convierte los datos al formato adecuado para el medio de transmisión." },
+  { q: "El receptor...", opts: ["Convierte la señal recibida nuevamente en datos.", "Genera la señal.", "Decide la topología."], correct: 0, exp: "El receptor realiza el proceso inverso al transmisor para recuperar la información." },
+  { q: "El sistema de transmisión es...", opts: ["El medio que conecta emisor y receptor.", "El ordenador servidor.", "El protocolo TCP."], correct: 0, exp: "El sistema de transmisión puede ser un cable o un medio inalámbrico por el que viajan las señales." },
+  { q: "¿Qué organización desarrolló el modelo de referencia OSI?", opts: ["IEEE", "ISO", "Cisco"], correct: 1, exp: "El modelo OSI fue desarrollado por la International Organization for Standardization (ISO)." },
+  { q: "¿Cuántas capas tiene el modelo OSI?", opts: ["4", "5", "7"], correct: 2, exp: "El modelo OSI divide la comunicación en siete capas." },
+  { q: "El objetivo principal del modelo OSI es...", opts: ["Fabricar routers.", "Estandarizar la comunicación entre dispositivos.", "Aumentar la velocidad de Internet."], correct: 1, exp: "El modelo OSI sirve como referencia para que diferentes fabricantes puedan comunicarse mediante estándares comunes." },
+  { q: "En el modelo OSI, una capa proporciona servicios a...", opts: ["La capa inferior.", "La capa superior.", "Todas las capas."], correct: 1, exp: "Cada capa utiliza los servicios de la inferior y proporciona servicios a la superior." },
+  { q: "¿Cuál es la capa 7 del modelo OSI?", opts: ["Transporte.", "Aplicación.", "Red."], correct: 1, exp: "La capa de Aplicación es la más cercana al usuario final." },
+  { q: "¿Qué capa del modelo OSI se encarga del formato de los datos?", opts: ["Presentación.", "Red.", "Física."], correct: 0, exp: "La capa de Presentación traduce, comprime o cifra la información cuando es necesario." },
+  { q: "¿Qué capa administra las sesiones entre aplicaciones?", opts: ["Sesión.", "Transporte.", "Física."], correct: 0, exp: "La capa de Sesión establece, mantiene y finaliza las comunicaciones entre aplicaciones." },
+  { q: "¿Qué protocolos aparecen en la capa de Transporte?", opts: ["HTTP y FTP.", "TCP y UDP.", "IP y ARP."], correct: 1, exp: "TCP y UDP trabajan en la capa de Transporte y utilizan números de puerto." },
+  { q: "¿Qué identifica la capa de Transporte además de TCP/UDP?", opts: ["Direcciones MAC.", "Puertos.", "Direcciones IPv6."], correct: 1, exp: "Los puertos permiten identificar el servicio o aplicación que utiliza la comunicación." },
+  { q: "¿Qué protocolo utiliza la capa de Red?", opts: ["IP.", "Ethernet.", "SSH."], correct: 0, exp: "La capa de Red trabaja con direcciones IP para encaminar los paquetes." },
+  { q: "¿Qué dispositivo trabaja principalmente en la capa de Red?", opts: ["Hub.", "Router.", "Repetidor."], correct: 1, exp: "Los routers encaminan paquetes utilizando direcciones IP." },
+  { q: "¿Qué capa utiliza las direcciones MAC?", opts: ["Enlace de datos.", "Transporte.", "Aplicación."], correct: 0, exp: "La capa de Enlace utiliza direcciones MAC para identificar dispositivos dentro de una red local." },
+  { q: "¿Qué dispositivo trabaja principalmente en la capa de Enlace?", opts: ["Router.", "Switch.", "Repetidor."], correct: 1, exp: "Los switches reenvían tramas utilizando las direcciones MAC." },
+  { q: "¿Qué dispositivo pertenece a la capa Física?", opts: ["Hub.", "Router.", "Firewall."], correct: 0, exp: "El hub únicamente repite señales eléctricas y trabaja en la capa física." },
+  { q: "¿Qué proceso añade información en cada capa antes de transmitir los datos?", opts: ["Modulación.", "Encapsulación.", "Multiplexación."], correct: 1, exp: "En la encapsulación cada capa añade su propia cabecera antes de enviar la información." },
+  { q: "El proceso inverso a la encapsulación recibe el nombre de...", opts: ["Decodificación.", "Desencapsulación.", "Desfragmentación."], correct: 1, exp: "El receptor elimina las cabeceras capa a capa hasta recuperar los datos originales." },
+  { q: "¿Quién desarrolló inicialmente TCP/IP?", opts: ["Microsoft.", "El Departamento de Defensa de EE. UU.", "Cisco."], correct: 1, exp: "TCP/IP nació en los años 60 como parte del proyecto ARPA del Departamento de Defensa estadounidense." },
+  { q: "TCP/IP es...", opts: ["Un único protocolo.", "Una pila de protocolos.", "Un sistema operativo."], correct: 1, exp: "TCP/IP está formado por varios protocolos, entre ellos TCP e IP." },
+  { q: "Actualmente, la pila de protocolos más utilizada es...", opts: ["IPX/SPX.", "AppleTalk.", "TCP/IP."], correct: 2, exp: "TCP/IP es la base de Internet y de prácticamente todas las redes actuales." },
+  { q: "El modelo TCP/IP tiene...", opts: ["Más capas que OSI.", "Menos capas que OSI.", "El mismo número de capas."], correct: 1, exp: "TCP/IP simplifica el modelo OSI agrupando varias de sus funciones." },
+  { q: "¿Cuál es la capa superior del modelo TCP/IP?", opts: ["Aplicación.", "Internet.", "Acceso al medio."], correct: 0, exp: "La capa de Aplicación engloba varias funciones de las capas superiores del modelo OSI." },
+  { q: "En TCP/IP, la capa Internet equivale aproximadamente a la capa...", opts: ["Física.", "Red.", "Aplicación."], correct: 1, exp: "Ambas gestionan el direccionamiento IP y el encaminamiento de paquetes." },
+  { q: "¿Cómo se denomina la unidad de datos de la capa de Transporte?", opts: ["Trama.", "Segmento.", "Bit."], correct: 1, exp: "En la capa de Transporte los datos reciben el nombre de segmento." },
+  { q: "¿Cómo se denomina la unidad de datos de la capa Internet?", opts: ["Paquete.", "Segmento.", "Bit."], correct: 0, exp: "La capa Internet encapsula la información en paquetes IP." },
+  { q: "¿Cuál es la unidad de datos de la capa de Acceso al Medio?", opts: ["Segmento.", "Trama y bits.", "Paquete."], correct: 1, exp: "La capa de Acceso al Medio transmite tramas sobre el medio físico, que finalmente se convierten en bits." },
+  { q: "¿En qué capa del modelo OSI trabaja un repetidor?", opts: ["Capa de Red", "Capa Física", "Capa de Transporte"], correct: 1, exp: "El repetidor opera en la capa física (capa 1), donde únicamente regenera y amplifica la señal." },
+  { q: "La función principal de un repetidor es...", opts: ["Asignar direcciones IP.", "Regenerar la señal.", "Filtrar paquetes."], correct: 1, exp: "El repetidor amplifica la señal para que pueda recorrer mayores distancias sin degradarse." },
+  { q: "Un repetidor modifica la topología de la red.", opts: ["Sí.", "Solo en redes WiFi.", "No."], correct: 2, exp: "El repetidor únicamente amplifica la señal, sin modificar la topología de la red." },
+  { q: "¿Cuál de los siguientes es un ejemplo de repetidor?", opts: ["Router.", "Repetidor WiFi.", "Switch."], correct: 1, exp: "Los repetidores WiFi amplían la cobertura regenerando la señal inalámbrica." },
+  { q: "¿En qué capa trabaja un hub?", opts: ["Capa Física.", "Capa de Enlace.", "Capa de Red."], correct: 0, exp: "El hub trabaja en la capa física y no interpreta las tramas Ethernet." },
+  { q: "Un hub envía la información...", opts: ["Solo al puerto destino.", "A todos los puertos.", "Solo al router."], correct: 1, exp: "El hub repite la señal por todos los puertos sin distinguir el destinatario." },
+  { q: "Internamente, un hub se comporta como...", opts: ["Un router.", "Un cable con todos los puertos unidos.", "Un switch inteligente."], correct: 1, exp: "Todos los puertos del hub forman un único medio compartido." },
+  { q: "La topología física de un hub es...", opts: ["Bus.", "Estrella.", "Anillo."], correct: 1, exp: "Los equipos se conectan físicamente en estrella alrededor del hub." },
+  { q: "La topología lógica de un hub es...", opts: ["Estrella.", "Bus.", "Árbol."], correct: 1, exp: "Aunque físicamente sea una estrella, todos los equipos comparten el mismo medio de transmisión." },
+  { q: "Un hub trabaja normalmente en modo...", opts: ["Full-duplex.", "Half-duplex.", "Simplex."], correct: 1, exp: "Al compartir el medio de transmisión, solo puede transmitir un equipo cada vez." },
+  { q: "Los hubs Ethernet actualmente...", opts: ["Son los dispositivos más utilizados.", "Han sido sustituidos por los switches.", "Han sustituido a los routers."], correct: 1, exp: "Los switches ofrecen un mejor rendimiento y eliminan muchas de las limitaciones de los hubs." },
+  { q: "¿En qué capa trabaja un switch?", opts: ["Capa Física.", "Capa de Enlace.", "Capa de Transporte."], correct: 1, exp: "El switch trabaja en la capa 2 utilizando direcciones MAC." },
+  { q: "Un switch aprende...", opts: ["Direcciones IP.", "Direcciones MAC.", "Nombres DNS."], correct: 1, exp: "El switch mantiene una tabla MAC para saber por qué puerto está conectado cada dispositivo." },
+  { q: "Un switch envía una trama...", opts: ["A todos los puertos.", "Solo al puerto donde está la MAC destino.", "Únicamente al router."], correct: 1, exp: "Gracias a la tabla MAC, el switch envía la trama únicamente al puerto correspondiente." },
+  { q: "La transmisión habitual de un switch es...", opts: ["Half-duplex.", "Full-duplex.", "Simplex."], correct: 1, exp: "Cada puerto puede transmitir y recibir simultáneamente." },
+  { q: "Un bridge trabaja en...", opts: ["Capa Física.", "Capa de Enlace.", "Capa de Aplicación."], correct: 1, exp: "Los bridges utilizan direcciones MAC para comunicar segmentos de red." },
+  { q: "La función principal de un bridge es...", opts: ["Asignar direcciones IP.", "Interconectar segmentos de red.", "Repetir señales."], correct: 1, exp: "Un bridge divide una red en segmentos y reenvía las tramas entre ellos." },
+  { q: "Un bridge suele disponer de...", opts: ["Entre 2 y 4 interfaces.", "24 interfaces.", "48 interfaces."], correct: 0, exp: "Tradicionalmente los bridges disponían de pocas interfaces, normalmente entre dos y cuatro." },
+  { q: "Un switch Ethernet puede considerarse...", opts: ["Un bridge con muchos puertos.", "Un repetidor avanzado.", "Un router."], correct: 0, exp: "Funcionalmente un switch realiza el trabajo de un bridge, pero con un mayor número de interfaces." },
+  { q: "Un punto de acceso (AP) conecta...", opts: ["Dos segmentos de red: cable e inalámbrico.", "Dos redes IP distintas.", "Dos routers."], correct: 0, exp: "Un AP actúa como puente entre la red Ethernet y la red WiFi." },
+  { q: "Un punto de acceso trabaja principalmente en...", opts: ["Capa 2.", "Capa 5.", "Capa 7."], correct: 0, exp: "El AP trabaja principalmente en la capa de enlace, aunque muchos incorporan funciones adicionales como DHCP." },
+  { q: "Es habitual que un punto de acceso incorpore...", opts: ["Un módem.", "Un switch Ethernet.", "Un firewall hardware."], correct: 1, exp: "Muchos puntos de acceso domésticos incluyen varios puertos Ethernet integrados." },
+  { q: "¿En qué capa trabaja un router?", opts: ["Capa Física.", "Capa de Enlace.", "Capa de Red."], correct: 2, exp: "El router utiliza direcciones IP para comunicar distintas redes." },
+  { q: "Un router interconecta...", opts: ["Equipos con la misma MAC.", "Redes con diferente prefijo IP.", "Puertos USB."], correct: 1, exp: "La misión principal del router es comunicar redes diferentes." },
+  { q: "La función principal de un router es...", opts: ["Encaminar paquetes entre redes.", "Repetir señales eléctricas.", "Aprender direcciones MAC."], correct: 0, exp: "El router decide el mejor camino para que los paquetes lleguen a otras redes utilizando el direccionamiento IP." },
+  { q: "Cisco IOS es...", opts: ["Un sistema operativo para dispositivos Cisco.", "Un programa antivirus.", "Un protocolo de red."], correct: 0, exp: "Cisco IOS es el sistema operativo que utilizan routers y switches Cisco para gestionar sus funciones y configuración." },
+  { q: "El kernel de un sistema operativo se encarga de...", opts: ["Gestionar la comunicación entre hardware y software.", "Navegar por Internet.", "Configurar direcciones IP."], correct: 0, exp: "El kernel administra los recursos del hardware y permite la comunicación entre el software y los componentes físicos." },
+  { q: "La interfaz CLI significa...", opts: ["Command Line Interface.", "Cisco Local Interface.", "Computer Link Interface."], correct: 0, exp: "La CLI permite interactuar con el dispositivo mediante comandos de texto." },
+  { q: "Una GUI se caracteriza por...", opts: ["Utilizar comandos de texto.", "Utilizar ventanas, iconos y menús.", "Solo funcionar en Cisco."], correct: 1, exp: "Una interfaz gráfica facilita el uso mediante elementos visuales como ventanas e iconos." },
+  { q: "¿Cuál es el método recomendado para administrar remotamente un dispositivo Cisco?", opts: ["Telnet.", "SSH.", "FTP."], correct: 1, exp: "SSH cifra toda la comunicación y protege la autenticación del usuario." },
+  { q: "Telnet se considera inseguro porque...", opts: ["No funciona con switches.", "Envía la información en texto plano.", "Solo funciona por consola."], correct: 1, exp: "Tanto usuarios como contraseñas viajan sin cifrar, pudiendo ser capturados." },
+  { q: "El puerto de consola sirve para...", opts: ["Configurar inicialmente el dispositivo.", "Compartir archivos.", "Conectar impresoras."], correct: 0, exp: "La consola proporciona acceso directo al equipo para realizar la configuración inicial y tareas de mantenimiento." },
+  { q: "¿Cuál de los siguientes es un emulador de terminal?", opts: ["PuTTY.", "Chrome.", "Photoshop."], correct: 0, exp: "PuTTY permite acceder a dispositivos Cisco mediante consola, SSH o Telnet." },
+  { q: "¿Cuál también es un programa de emulación de terminal?", opts: ["Tera Term.", "VLC.", "WinRAR."], correct: 0, exp: "Tera Term es otro software ampliamente utilizado para administrar equipos de red." },
+  { q: "El símbolo > indica que estamos en...", opts: ["Modo EXEC de usuario.", "Modo privilegiado.", "Configuración global."], correct: 0, exp: "El prompt terminado en > identifica el modo EXEC de usuario." },
+  { q: "El símbolo # indica normalmente...", opts: ["Modo EXEC privilegiado.", "Modo usuario.", "Modo interfaz."], correct: 0, exp: "El modo privilegiado permite ejecutar comandos avanzados de administración." },
+  { q: "¿Qué comando permite acceder al modo privilegiado?", opts: ["login", "enable", "configure"], correct: 1, exp: "El comando enable cambia del modo usuario al modo EXEC privilegiado." },
+  { q: "¿Qué comando permite acceder al modo de configuración global?", opts: ["configure terminal", "terminal", "config"], correct: 0, exp: "Desde el modo privilegiado se utiliza configure terminal para comenzar la configuración del dispositivo." },
+  { q: "El prompt (config)# corresponde a...", opts: ["Configuración global.", "Configuración de interfaz.", "Modo usuario."], correct: 0, exp: "Es el modo desde el que se realizan la mayoría de configuraciones del equipo." },
+  { q: "El prompt (config-if)# corresponde a...", opts: ["Configuración de interfaz.", "Configuración VLAN.", "Configuración de consola."], correct: 0, exp: "Este modo permite configurar parámetros específicos de una interfaz física o lógica." },
+  { q: "¿Qué hace el comando exit?", opts: ["Baja un nivel en la jerarquía de configuración.", "Reinicia el switch.", "Borra la configuración."], correct: 0, exp: "exit regresa al modo inmediatamente superior." },
+  { q: "¿Qué hace el comando end?", opts: ["Vuelve directamente al modo EXEC privilegiado.", "Apaga el dispositivo.", "Guarda la configuración."], correct: 0, exp: "end permite salir de cualquier modo de configuración hasta el modo privilegiado." },
+  { q: "En la sintaxis de comandos Cisco, el texto en negrita representa...", opts: ["Comandos y palabras clave que deben escribirse literalmente.", "Comentarios.", "Variables."], correct: 0, exp: "Los elementos en negrita deben introducirse exactamente como aparecen." },
+  { q: "En la sintaxis Cisco, el texto en cursiva representa...", opts: ["Argumentos definidos por el usuario.", "Comandos obligatorios.", "Comentarios."], correct: 0, exp: "La cursiva indica valores que debe proporcionar el usuario, como una dirección IP." },
+  { q: "En la sintaxis Cisco, los corchetes [ ] indican...", opts: ["Un elemento opcional.", "Un elemento obligatorio.", "Un comentario."], correct: 0, exp: "Todo lo que aparece entre corchetes puede omitirse." },
+  { q: "Las llaves { } indican...", opts: ["Un elemento obligatorio.", "Un comentario.", "Una opción opcional."], correct: 0, exp: "Todo lo que aparece entre llaves debe seleccionarse o introducirse obligatoriamente." },
+  { q: "¿Qué comando sirve para comprobar la conectividad con otro dispositivo?", opts: ["ping", "copy", "erase"], correct: 0, exp: "El comando ping envía mensajes ICMP para comprobar si un dispositivo responde." },
+  { q: "¿Qué comando muestra la ruta seguida por los paquetes?", opts: ["traceroute", "enable", "hostname"], correct: 0, exp: "traceroute permite conocer los saltos que siguen los paquetes hasta el destino." },
+  { q: "IOS dispone de ayuda contextual para...", opts: ["Mostrar únicamente la configuración.", "Ayudar al usuario a completar comandos.", "Reiniciar el equipo."], correct: 1, exp: "La ayuda contextual facilita conocer los comandos disponibles y completar correctamente su sintaxis." },
+  { q: "La principal ventaja de conocer la jerarquía de modos en Cisco IOS es...", opts: ["Permitir acceder rápidamente al nivel adecuado de configuración.", "Aumentar la velocidad del switch.", "Cambiar automáticamente las direcciones IP."], correct: 0, exp: "Comprender los modos (usuario, privilegiado, configuración global e interfaces) permite administrar correctamente un dispositivo Cisco." },
+  { q: "¿Qué comando permite acceder al modo EXEC privilegiado?", opts: ["configure terminal", "enable", "login"], correct: 1, exp: "enable cambia del modo EXEC de usuario (>) al modo EXEC privilegiado (#)." },
+  { q: "¿Qué comando permite entrar en el modo de configuración global?", opts: ["config", "configure terminal", "terminal config"], correct: 1, exp: "configure terminal permite acceder al modo (config)#." },
+  { q: "¿Qué comando cambia el nombre del switch?", opts: ["hostname Switch1", "switchname Switch1", "name Switch1"], correct: 0, exp: "hostname modifica el nombre del dispositivo Cisco." },
+  { q: "¿Qué comando configura la contraseña del modo privilegiado?", opts: ["enable password", "enable secret contraseña", "password enable"], correct: 1, exp: "enable secret establece una contraseña cifrada para acceder al modo privilegiado." },
+  { q: "¿Qué comando configura una contraseña para la consola?", opts: ["line console 0", "console password", "interface console"], correct: 0, exp: "Primero se entra en line console 0 para configurar la contraseña de acceso por consola." },
+  { q: "Después de configurar la contraseña de consola, ¿qué comando permite exigirla?", opts: ["password", "login", "enable"], correct: 1, exp: "Sin login, la contraseña configurada no será solicitada." },
+  { q: "¿Qué comando permite acceder a la configuración de una interfaz?", opts: ["interface FastEthernet0/1", "config interface", "port fa0/1"], correct: 0, exp: "interface permite configurar una interfaz concreta." },
+  { q: "¿Qué comando activa una interfaz?", opts: ["interface up", "no shutdown", "enable interface"], correct: 1, exp: "Por defecto algunas interfaces están apagadas administrativamente." },
+  { q: "¿Qué comando desactiva una interfaz?", opts: ["shutdown", "disable", "down"], correct: 0, exp: "shutdown apaga administrativamente una interfaz." },
+  { q: "¿Qué comando configura una dirección IP en una interfaz?", opts: ["ip interface", "ip address 192.168.1.1 255.255.255.0", "address ip"], correct: 1, exp: "Se indica la IP seguida de la máscara de subred." },
+  { q: "¿Qué comando guarda la configuración en la memoria NVRAM?", opts: ["write memory", "save config", "store"], correct: 0, exp: "write memory guarda la configuración para que no se pierda tras reiniciar." },
+  { q: "¿Qué comando también guarda la configuración?", opts: ["copy running-config startup-config", "save startup", "startup-config running-config"], correct: 0, exp: "Es el método recomendado actualmente." },
+  { q: "¿Qué comando muestra la configuración activa?", opts: ["show running-config", "show startup", "show config all"], correct: 0, exp: "Muestra la configuración que está ejecutándose en ese momento." },
+  { q: "¿Qué comando muestra la configuración guardada?", opts: ["show startup-config", "show running-config", "show save"], correct: 0, exp: "Muestra la configuración almacenada en la memoria NVRAM." },
+  { q: "¿Qué comando muestra información del IOS?", opts: ["show version", "version", "show system"], correct: 0, exp: "show version informa sobre el IOS, memoria y tiempo de funcionamiento." },
+  { q: "¿Qué comando muestra un resumen de las interfaces?", opts: ["show ip interface brief", "show interfaces short", "show ports"], correct: 0, exp: "Es uno de los comandos más utilizados para comprobar el estado de las interfaces." },
+  { q: "¿Qué comando muestra la tabla MAC?", opts: ["show mac address-table", "show arp", "show ethernet"], correct: 0, exp: "Permite ver qué direcciones MAC ha aprendido el switch." },
+  { q: "¿Qué comando comprueba la conectividad?", opts: ["ping", "traceroute", "test"], correct: 0, exp: "Envía mensajes ICMP para comprobar si un equipo responde." },
+  { q: "¿Qué comando muestra la ruta hasta un destino?", opts: ["traceroute", "ping", "ip route"], correct: 0, exp: "Permite conocer los routers por los que pasa un paquete." },
+  { q: "¿Qué comando permite salir directamente al modo privilegiado?", opts: ["end", "exit", "quit"], correct: 0, exp: "end evita salir nivel por nivel." },
+  { q: "¿Qué comando baja solo un nivel?", opts: ["exit", "end", "back"], correct: 0, exp: "exit vuelve únicamente al modo inmediatamente superior." },
+  { q: "¿Qué tecla completa automáticamente un comando?", opts: ["Enter", "Tabulador (TAB)", "Esc"], correct: 1, exp: "TAB completa los comandos cuando son únicos." },
+  { q: "¿Qué símbolo activa la ayuda contextual?", opts: ["#", "?", "@"], correct: 1, exp: "El signo de interrogación muestra comandos disponibles." },
+  { q: "¿Qué comando borra el contenido de la pantalla?", opts: ["clear screen", "Ctrl+L", "Ninguno, depende del terminal."], correct: 2, exp: "Cisco IOS no dispone de un comando universal para limpiar la pantalla; depende del emulador de terminal." },
+  { q: "¿Qué comando muestra información de una interfaz concreta?", opts: ["show interfaces FastEthernet0/1", "interface show", "show port"], correct: 0, exp: "Permite consultar estadísticas y estado de una interfaz específica." },
+  { q: "¿Qué comando muestra la configuración IP de las interfaces?", opts: ["show ip interface brief", "ip show", "show address"], correct: 0, exp: "Resume IP, método de asignación y estado de cada interfaz." },
+  { q: "¿Qué comando cambia al modo de configuración de línea VTY?", opts: ["line vty 0 4", "vty configure", "interface vty"], correct: 0, exp: "Se utiliza para configurar el acceso remoto (Telnet/SSH)." },
+  { q: "¿Qué comando cifra todas las contraseñas en texto plano?", opts: ["service password-encryption", "encrypt passwords", "password encrypt"], correct: 0, exp: "Convierte las contraseñas visibles en texto cifrado básico." },
+  { q: "¿Qué comando configura el mensaje de bienvenida?", opts: ["banner motd #Acceso restringido#", "welcome", "motd"], correct: 0, exp: "El banner MOTD aparece antes del inicio de sesión." },
+  { q: "¿Qué comando reinicia un switch Cisco?", opts: ["reload", "reboot", "restart"], correct: 0, exp: "reload reinicia el dispositivo; si hay cambios sin guardar, IOS solicitará confirmación." }
+];
+
+const LABELS = ['a', 'b', 'c'];
+let order = QS.map((_, i) => i);
+let current = 0;
+let answers = new Array(QS.length).fill(null);
+let mode = 'seq';
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-seq').classList.toggle('active', m === 'seq');
+  document.getElementById('btn-rnd').classList.toggle('active', m === 'rnd');
+  order = m === 'rnd' ? shuffle([...QS.map((_, i) => i)]) : QS.map((_, i) => i);
+  answers = new Array(QS.length).fill(null);
+  current = 0;
+  render();
+}
+
+function countAnswered() { return answers.filter(a => a !== null).length; }
+function countCorrect() { return order.filter((qi, pos) => answers[pos] === QS[qi].correct).length; }
+
+function render() {
+  const container = document.getElementById('q-container');
+  const resultsEl = document.getElementById('results');
+  const navRow = document.getElementById('nav-row');
+  const allDone = answers.every(a => a !== null);
+
+  if (allDone) {
+    container.innerHTML = '';
+    navRow.style.display = 'none';
+    showResults();
+    return;
+  }
+
+  resultsEl.classList.remove('show');
+  navRow.style.display = 'flex';
+
+  const qi = order[current];
+  const q = QS[qi];
+  const ans = answers[current];
+  const done = ans !== null;
+
+  const answered = countAnswered();
+  const pct = Math.round(answered / QS.length * 100);
+  document.getElementById('prog-label').textContent = `${answered} de ${QS.length} respondidas`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('score-info').textContent = answered > 0 ? `${countCorrect()} correctas` : '';
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === QS.length - 1;
+
+  let optsHtml = q.opts.map((opt, i) => {
+    let cls = '';
+    let icon = '';
+    if (done) {
+      if (i === q.correct) { cls = 'correct'; icon = '<span class="opt-icon"></span>'; }
+      else if (i === ans) { cls = 'wrong'; icon = '<span class="opt-icon"></span>'; }
+    }
+    return `<button class="opt ${cls}" ${done ? 'disabled' : ''} onclick="pick(${i})">
+      <span class="opt-label">${LABELS[i]}.</span>
+      <span class="opt-text">${opt}</span>
+      ${icon}
+    </button>`;
+  }).join('');
+
+  const expHtml = done
+    ? `<div class="explanation show">💡 ${q.exp}</div>`
+    : `<div class="explanation"></div>`;
+
+  container.innerHTML = `<div class="q-card">
+    <span class="q-number">Pregunta ${current + 1} / ${QS.length}</span>
+    <div class="q-text">${q.q}</div>
+    <div class="options">${optsHtml}</div>
+    ${expHtml}
+  </div>`;
+}
+
+function pick(i) {
+  if (answers[current] !== null) return;
+  answers[current] = i;
+  render();
+  const allDone = answers.every(a => a !== null);
+  if (!allDone && current < QS.length - 1) {
+    setTimeout(() => { current++; render(); }, 1200);
+  } else if (allDone) {
+    setTimeout(() => { render(); }, 1000);
+  }
+}
+
+function go(dir) {
+  current = Math.max(0, Math.min(QS.length - 1, current + dir));
+  render();
+}
+
+function showResults() {
+  const total = QS.length;
+  const ok = countCorrect();
+  const ko = total - ok;
+  const pct = Math.round(ok / total * 100);
+
+  document.getElementById('prog-label').textContent = `${total} de ${total} respondidas`;
+  document.getElementById('prog-pct').textContent = '100%';
+  document.getElementById('prog-fill').style.width = '100%';
+
+  document.getElementById('res-emoji').textContent = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+  document.getElementById('res-score').textContent = `${ok}/${total}`;
+  document.getElementById('res-sub').textContent = `${pct}% de aciertos`;
+  document.getElementById('res-ok').textContent = ok;
+  document.getElementById('res-ko').textContent = ko;
+
+  let reviewHtml = '';
+  const errors = order.filter((qi, pos) => answers[pos] !== null && answers[pos] !== QS[qi].correct);
+  if (errors.length > 0) {
+    reviewHtml = `<div class="review-title">Repasa estos errores (${errors.length})</div>`;
+    order.forEach((qi, pos) => {
+      if (answers[pos] !== null && answers[pos] !== QS[qi].correct) {
+        reviewHtml += `<div class="review-item">
+          <div class="review-q">${pos + 1}. ${QS[qi].q}</div>
+          <div class="review-a ko">✗ Tu respuesta: ${QS[qi].opts[answers[pos]]}</div>
+          <div class="review-a ok">✓ Correcta: ${QS[qi].opts[QS[qi].correct]}</div>
+          <div class="review-exp">💡 ${QS[qi].exp}</div>
+        </div>`;
+      }
+    });
+  }
+  document.getElementById('review').innerHTML = reviewHtml;
+  document.getElementById('results').classList.add('show');
+}
+
+function restart() {
+  answers = new Array(QS.length).fill(null);
+  current = 0;
+  if (mode === 'rnd') order = shuffle([...QS.map((_, i) => i)]);
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('nav-row').style.display = 'flex';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

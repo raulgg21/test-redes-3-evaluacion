@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Examen interactivo - Redes Trimestre 2</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#fff; --text:#172033; --muted:#647084; --ok:#15803d; --bad:#b91c1c; --accent:#2563eb; --line:#d8dee9; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:linear-gradient(180deg,#eef4ff,var(--bg)); color:var(--text); }
+    header { position:sticky; top:0; z-index:5; background:rgba(255,255,255,.92); backdrop-filter: blur(8px); border-bottom:1px solid var(--line); }
+    .wrap { max-width:980px; margin:0 auto; padding:22px; }
+    h1 { margin:0 0 6px; font-size:clamp(1.6rem,3vw,2.4rem); }
+    .sub { color:var(--muted); margin:0; }
+    .bar { margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    button { border:0; border-radius:12px; padding:11px 16px; cursor:pointer; font-weight:700; background:var(--accent); color:white; box-shadow:0 8px 18px rgba(37,99,235,.18); }
+    button.secondary { background:#e7ecf5; color:#243044; box-shadow:none; }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .score { margin-left:auto; background:#eef2ff; color:#1e3a8a; padding:10px 14px; border-radius:999px; font-weight:800; }
+    main.wrap { display:grid; gap:16px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:0 10px 25px rgba(24,36,65,.06); }
+    .qtitle { font-size:1.05rem; font-weight:800; margin-bottom:14px; line-height:1.35; }
+    .options { display:grid; gap:9px; }
+    label { display:flex; gap:10px; align-items:flex-start; border:1px solid var(--line); padding:12px; border-radius:13px; cursor:pointer; transition:.15s; }
+    label:hover { border-color:#93b5fd; background:#f8fbff; }
+    input { margin-top:3px; }
+    .feedback { margin-top:12px; font-weight:700; min-height:1.4em; }
+    .correct { border-color:rgba(21,128,61,.45)!important; background:#f0fdf4!important; }
+    .incorrect { border-color:rgba(185,28,28,.45)!important; background:#fef2f2!important; }
+    .ok { color:var(--ok); } .bad { color:var(--bad); }
+    .note { color:var(--muted); font-weight:500; margin-top:6px; }
+    .result { font-size:1.15rem; }
+    @media (max-width:640px) { .score { margin-left:0; width:100%; text-align:center; } .wrap { padding:16px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Examen interactivo: Redes - Trimestre 2</h1>
+      <p class="sub">Selecciona una respuesta por pregunta. Después puedes corregir, mostrar soluciones o reiniciar.</p>
+      <div class="bar">
+        <button id="check">Corregir examen</button>
+        <button id="show" class="secondary">Mostrar soluciones</button>
+        <button id="reset" class="secondary">Reiniciar</button>
+        <span class="score" id="score">0 / 20</span>
+      </div>
+    </div>
+  </header>
+  <main class="wrap" id="quiz"></main>
+<script>
+const questions = [{"n": 1, "text": "La capa de transporte es", "options": ["responsable de las comunicaciones físicas", "responsable de las comunicaciones lógicas", "ambas respuestas son ciertas"], "answer": 1, "note": ""}, {"n": 2, "text": "El protocolo TCP", "options": ["ordena los segmentos", "no confirma los paquetes", "es más rápido que UDP"], "answer": 0, "note": ""}, {"n": 3, "text": "El protocolo UDP", "options": ["entrega en el mismo orden", "admite control de flujo", "es más ligero que TCP"], "answer": 2, "note": ""}, {"n": 4, "text": "El tamaño de la ventana de la cabecera del segmento se utiliza para", "options": ["controlar el flujo", "indicar los bytes que se aceptan", "ambas son válidas"], "answer": 2, "note": ""}, {"n": 5, "text": "Un socket está formado por", "options": ["MAC + IP + Puerto", "IP + Puerto", "Puerto"], "answer": 1, "note": ""}, {"n": 6, "text": "En TCP, ante un SEQ=100 del emisor, el receptor responde con", "options": ["Un ACK de 99", "Un ACK de 100", "un ACK de 101"], "answer": 2, "note": ""}, {"n": 7, "text": "La capa de aplicación del modelo TCP/IP equivale a las siguientes capas del modelo OSI", "options": ["Aplicación y Presentación", "Aplicación, Presentación y Sesión", "Aplicación, Presentación, Autenticación y Sesión"], "answer": 1, "note": ""}, {"n": 8, "text": "La VLAN predeterminado de un switch Cisco es la", "options": ["1", "99", "100"], "answer": 0, "note": ""}, {"n": 9, "text": "Si no está habilitado Auto-MDIX en un switch se deben utilizar", "options": ["Cables directos para conectarse a routers", "Cables cruzados para conectarse a otros switches", "Ambas respuestas son correctas"], "answer": 2, "note": ""}, {"n": 10, "text": "Un switch tiene una tabla", "options": ["CAM", "ARP", "IP"], "answer": 0, "note": ""}, {"n": 11, "text": "El método de conmutación más rápido es el", "options": ["store-and-forward", "cut-through", "fast-switching"], "answer": 1, "note": ""}, {"n": 12, "text": "La VLAN nativa", "options": ["se dedica al tráfico generado por el usuario", "solo se utiliza en enlaces troncales", "se utiliza para administración"], "answer": 1, "note": ""}, {"n": 13, "text": "Un enlace troncal soporta el protocolo", "options": ["802.1A", "802.1K", "802.1Q"], "answer": 2, "note": ""}, {"n": 14, "text": "La etiqueta de la VLAN se crea en la capa", "options": ["2", "3", "4"], "answer": 0, "note": ""}, {"n": 15, "text": "Si un router recibe un paquete con destino sin coincidencia en la tabla de enrutamiento", "options": ["Descarta el paquete", "Lo devuelve al destinatario", "Lo reenvía por todas las interfaces"], "answer": 0, "note": ""}, {"n": 16, "text": "Según esta imagen, si yo me conecto a R1 por telnet, me tendré que autenticar con", "options": ["cisco", "cisco2", "no puede conectarme por telnet"], "answer": 2, "note": "El comando transport input ssh bloquea Telnet."}, {"n": 17, "text": "El protocolo OSPF es de tipo", "options": ["vector distancia", "estado del enlace", "vector ruta"], "answer": 1, "note": ""}, {"n": 18, "text": "En la terminología NAT, la dirección global interna", "options": ["es la dirección de origen vista desde la red externa", "es la dirección de destino vista desde la red externa", "es la dirección de destino vista desde la red interna"], "answer": 0, "note": ""}, {"n": 19, "text": "En el NAT estático", "options": ["se utiliza una asignación uno a uno constante", "se utiliza un pool de direcciones", "se utiliza una dirección compartida entre todos"], "answer": 0, "note": ""}, {"n": 20, "text": "Para qué sirve la palabra overload de la siguiente imagen", "options": ["Para utilizar NAT estático", "Para utilizar NAT dinámico", "Para utilizar PAT"], "answer": 2, "note": ""}];
+const quiz = document.getElementById('quiz');
+const scoreEl = document.getElementById('score');
+
+function letter(i) { return ['a','b','c','d'][i] || String(i+1); }
+function render() {
+  quiz.innerHTML = questions.map(q => `
+    <section class="card" data-q="${q.n}">
+      <div class="qtitle">${q.n}. ${q.text}</div>
+      <div class="options">
+        ${q.options.map((op,i)=>`
+          <label data-opt="${i}">
+            <input type="radio" name="q${q.n}" value="${i}">
+            <span><strong>${letter(i)}.</strong> ${op}</span>
+          </label>`).join('')}
+      </div>
+      <div class="feedback" aria-live="polite"></div>
+    </section>`).join('');
+  document.querySelectorAll('input[type=radio]').forEach(input => input.addEventListener('change', updateLive));
+}
+function updateLive() {
+  let answered = questions.filter(q => document.querySelector(`input[name=q${q.n}]:checked`)).length;
+  scoreEl.textContent = `${answered} / ${questions.length} respondidas`;
+}
+function clearMarks() {
+  document.querySelectorAll('label').forEach(l => l.classList.remove('correct','incorrect'));
+  document.querySelectorAll('.feedback').forEach(f => f.innerHTML='');
+}
+function check(showOnly=false) {
+  clearMarks();
+  let ok = 0;
+  questions.forEach(q => {
+    const card = document.querySelector(`[data-q="${q.n}"]`);
+    const chosen = document.querySelector(`input[name=q${q.n}]:checked`);
+    const labels = card.querySelectorAll('label');
+    labels[q.answer].classList.add('correct');
+    if (chosen) {
+      const val = Number(chosen.value);
+      if (val === q.answer) { ok++; card.querySelector('.feedback').innerHTML = '<span class="ok">✓ Correcta</span>'; }
+      else {
+        labels[val].classList.add('incorrect');
+        card.querySelector('.feedback').innerHTML = `<span class="bad">✗ Incorrecta.</span> Respuesta correcta: <strong>${letter(q.answer)}. ${q.options[q.answer]}</strong>`;
+      }
+    } else {
+      card.querySelector('.feedback').innerHTML = showOnly ? `Solución: <strong>${letter(q.answer)}. ${q.options[q.answer]}</strong>` : '<span class="bad">Sin responder.</span>';
+    }
+    if (q.note) card.querySelector('.feedback').innerHTML += `<div class="note">${q.note}</div>`;
+  });
+  scoreEl.textContent = `${ok} / ${questions.length} correctas`;
+  const existing = document.getElementById('finalResult');
+  if (existing) existing.remove();
+  const pct = Math.round((ok/questions.length)*100);
+  const result = document.createElement('section');
+  result.id='finalResult'; result.className='card result';
+  result.innerHTML = `<strong>Resultado:</strong> ${ok} de ${questions.length} correctas (${pct}%).`;
+  quiz.prepend(result);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('check').onclick = () => check(false);
+document.getElementById('show').onclick = () => check(true);
+document.getElementById('reset').onclick = () => { render(); scoreEl.textContent = `0 / ${questions.length}`; window.scrollTo({top:0, behavior:'smooth'}); };
+render();
+</script>
+</body>
+</html>

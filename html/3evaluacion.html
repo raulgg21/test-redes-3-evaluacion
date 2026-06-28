@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de Redes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #171b26;
+    --surface2: #1e2333;
+    --border: #2a2f42;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --success: #34d399;
+    --success-dim: rgba(52,211,153,0.12);
+    --danger: #f87171;
+    --danger-dim: rgba(248,113,113,0.12);
+    --text: #e8eaf2;
+    --text-muted: #6b7494;
+    --text-dim: #4a5070;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --radius: 10px;
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+  body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; }
+
+  /* Header */
+  header { width: 100%; max-width: 680px; margin-bottom: 2.5rem; }
+  .header-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Progress */
+  .progress-wrap { width: 100%; max-width: 680px; margin-bottom: 1.5rem; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-family: var(--mono); }
+  .progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+  /* Mode buttons */
+  .mode-row { display: flex; gap: 8px; width: 100%; max-width: 680px; margin-bottom: 1.5rem; }
+  .mode-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 12px; font-family: var(--sans); cursor: pointer; transition: all 0.15s; }
+  .mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mode-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
+  /* Question card */
+  .q-card { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-bottom: 1rem; }
+  .q-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+  .q-number { font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--accent-dim); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .q-text { font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; cursor: pointer; font-size: 14px; color: var(--text); text-align: left; width: 100%; font-family: var(--sans); transition: border-color 0.15s, background 0.15s; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-dim); }
+  .opt:disabled { cursor: default; }
+  .opt-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 20px; font-weight: 500; flex-shrink: 0; }
+  .opt-text { flex: 1; }
+  .opt-icon { margin-left: auto; font-size: 16px; flex-shrink: 0; }
+  .opt.correct { border-color: var(--success); background: var(--success-dim); }
+  .opt.correct .opt-label { color: var(--success); }
+  .opt.correct .opt-icon::after { content: '✓'; color: var(--success); font-weight: 600; }
+  .opt.wrong { border-color: var(--danger); background: var(--danger-dim); }
+  .opt.wrong .opt-label { color: var(--danger); }
+  .opt.wrong .opt-icon::after { content: '✗'; color: var(--danger); font-weight: 600; }
+
+  /* Nav */
+  .nav-row { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 680px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text); font-size: 14px; font-family: var(--sans); cursor: pointer; transition: all 0.15s; }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .score-info { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+  /* Results */
+  .results { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2.5rem; text-align: center; display: none; }
+  .results.show { display: block; }
+  .results-emoji { font-size: 48px; margin-bottom: 1rem; }
+  .results-score { font-family: var(--mono); font-size: 52px; font-weight: 500; color: var(--accent); line-height: 1; }
+  .results-sub { font-size: 14px; color: var(--text-muted); margin-top: 6px; margin-bottom: 2rem; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem; }
+  .stat-box { background: var(--surface2); border-radius: var(--radius); padding: 16px; }
+  .stat-val { font-family: var(--mono); font-size: 28px; font-weight: 500; }
+  .stat-val.ok { color: var(--success); }
+  .stat-val.ko { color: var(--danger); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .restart-btn { padding: 11px 28px; background: var(--accent); border: none; border-radius: var(--radius); color: #fff; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: opacity 0.15s; }
+  .restart-btn:hover { opacity: 0.85; }
+  .review { margin-top: 2rem; text-align: left; }
+  .review-title { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); }
+  .review-item { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+  .review-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .review-a { font-size: 12px; margin-bottom: 3px; }
+  .review-a.ko { color: var(--danger); }
+  .review-a.ok { color: var(--success); }
+
+  /* Transition */
+  #q-container { width: 100%; max-width: 680px; }
+  .q-card { animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 20px; }
+    .q-text { font-size: 15px; }
+    .results-score { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Módulo de Redes</div>
+  <h1>Test <span>interactivo</span></h1>
+  <p class="subtitle">20 preguntas · Selecciona tu respuesta y recibe feedback al instante</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="prog-label">0 de 20 respondidas</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div class="mode-row">
+  <button class="mode-btn active" id="btn-seq" onclick="setMode('seq')">Secuencial</button>
+  <button class="mode-btn" id="btn-rnd" onclick="setMode('rnd')">Orden aleatorio</button>
+</div>
+
+<div id="q-container"></div>
+
+<div class="nav-row" id="nav-row">
+  <button class="nav-btn" id="btn-prev" onclick="go(-1)" disabled>← Anterior</button>
+  <span class="score-info" id="score-info"></span>
+  <button class="nav-btn" id="btn-next" onclick="go(1)">Siguiente →</button>
+</div>
+
+<div class="results" id="results">
+  <div class="results-emoji" id="res-emoji"></div>
+  <div class="results-score" id="res-score"></div>
+  <div class="results-sub" id="res-sub"></div>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-val ok" id="res-ok"></div><div class="stat-lbl">Correctas</div></div>
+    <div class="stat-box"><div class="stat-val ko" id="res-ko"></div><div class="stat-lbl">Incorrectas</div></div>
+  </div>
+  <button class="restart-btn" onclick="restart()">Repetir test</button>
+  <div class="review" id="review"></div>
+</div>
+
+<script>
+const QS = [
+  { q: "Una topología de malla completa", opts: ["Es la topología más tolerante a fallos", "Conecta muchos sitios, pero no todos", "Es la de menor coste económico"], correct: 0 },
+  { q: "Una red MPLS", opts: ["Funciona por conmutación de circuitos", "Es una red de banda ancha dedicada", "Permite encapsular tráfico tanto IPv4 como IPv6"], correct: 2 },
+  { q: "Si nuestra operadora tiene FTTH, nos pondrá fibra óptica hasta", opts: ["Nuestra casa", "Nuestro edificio", "Nuestro barrio"], correct: 0 },
+  { q: "Una WPAN", opts: ["Es una red inalámbrica de corto alcance", "Es una red inalámbrica de medio alcance", "Es una red inalámbrica de largo alcance"], correct: 0 },
+  { q: "WiMAX", opts: ["Es una tecnología alámbrica para redes locales", "Permite emparejar dispositivos hasta una distancia de 50m", "Es una tecnología de comunicación inalámbrica"], correct: 2 },
+  { q: "La WiFi 5", opts: ["Permite velocidades de hasta 20 Gb/s", "Únicamente permite la transmisión en 5 GHz", "No admite MIMO"], correct: 1 },
+  { q: "El organismo encargado de los estándares inalámbricos 802.11 es", opts: ["ITU", "IEEE", "WiFi Alliance"], correct: 1 },
+  { q: "Los AP basados en controlador", opts: ["Se configuran de forma independiente a través de una GUI", "No se comunican con el WLC", "También se llaman LAP"], correct: 2 },
+  { q: "Las antenas MIMO", opts: ["Permiten varios flujos de entrada/salida", "Enfocan la señal de radio hacia una dirección específica", "Están formadas por una antena omnidireccional multipolar"], correct: 0 },
+  { q: "Si conectamos el portátil al móvil estamos haciendo", opts: ["Tethering", "Cafethering", "Lathering"], correct: 0 },
+  { q: "Si tengo varios conjuntos de servicios básicos conectados por cable formo un", opts: ["BSS", "ESS", "LSS"], correct: 1 },
+  { q: "El campo SA de la trama 802.11 identifica", opts: ["El dispositivo origen", "El dispositivo intermedio", "El dispositivo destino"], correct: 0 },
+  { q: "Las WLAN utilizan para comunicarse", opts: ["CSMA/CA", "CSMA/CB", "CSMA/CC"], correct: 0 },
+  { q: "En el modo pasivo de WiFi", opts: ["Los clientes deben conocer el SSID", "El AP no anuncia su SSID", "El SSID se transmite en abierto"], correct: 2 },
+  { q: "CAPWAP", opts: ["Opera únicamente sobre IPv4", "Permite administrar WLC", "Permite configurar varios APs"], correct: 2 },
+  { q: "El protocolo SNMP permite", opts: ["Configurar la misma hora en todos los dispositivos", "Centralizar los logs", "Administrar los nodos de una red"], correct: 2 },
+  { q: "El protocolo CDP es similar a", opts: ["NDP", "LLDP", "JTDP"], correct: 1 },
+  { q: "La regla 10 de la ACL BROWSING sirve para que", opts: ["Los ordenadores de la red interna puedan acceder a la red externa", "Los ordenadores de la red interna puedan navegar", "Los ordenadores de la red interna puedan conectarse a los puertos www y 443"], correct: 1 },
+  { q: "Las ACL extendidas pueden filtrar", opts: ["En la capa 3", "En la capa 4", "En ambas capas"], correct: 2 },
+  { q: "La actividad de configuración del WLC tenía un problema de base que impedía que se conectasen los dispositivos. Para solucionarlo", opts: ["Se tenía que establecer la hora del WLC", "Se tenía que poner correctamente la IP del servidor RADIUS", "Se tenía que cambiar el puerto de la VLAN 5 a la boca 2 del switch"], correct: 0 }
+];
+
+const LABELS = ['a', 'b', 'c'];
+let order = QS.map((_, i) => i);
+let current = 0;
+let answers = new Array(QS.length).fill(null);
+let mode = 'seq';
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-seq').classList.toggle('active', m === 'seq');
+  document.getElementById('btn-rnd').classList.toggle('active', m === 'rnd');
+  order = m === 'rnd' ? shuffle([...QS.map((_, i) => i)]) : QS.map((_, i) => i);
+  answers = new Array(QS.length).fill(null);
+  current = 0;
+  render();
+}
+
+function countAnswered() { return answers.filter(a => a !== null).length; }
+function countCorrect() { return order.filter((qi, pos) => answers[pos] === QS[qi].correct).length; }
+
+function render() {
+  const container = document.getElementById('q-container');
+  const resultsEl = document.getElementById('results');
+  const navRow = document.getElementById('nav-row');
+
+  const allDone = answers.every(a => a !== null);
+
+  if (allDone) {
+    container.innerHTML = '';
+    navRow.style.display = 'none';
+    showResults();
+    return;
+  }
+
+  resultsEl.classList.remove('show');
+  navRow.style.display = 'flex';
+
+  const qi = order[current];
+  const q = QS[qi];
+  const ans = answers[current];
+  const done = ans !== null;
+
+  const answered = countAnswered();
+  const pct = Math.round(answered / QS.length * 100);
+  document.getElementById('prog-label').textContent = `${answered} de ${QS.length} respondidas`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('score-info').textContent = answered > 0 ? `${countCorrect()} correctas` : '';
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === QS.length - 1;
+
+  let optsHtml = q.opts.map((opt, i) => {
+    let cls = '';
+    let icon = '';
+    if (done) {
+      if (i === q.correct) { cls = 'correct'; icon = '<span class="opt-icon"></span>'; }
+      else if (i === ans) { cls = 'wrong'; icon = '<span class="opt-icon"></span>'; }
+    }
+    return `<button class="opt ${cls}" ${done ? 'disabled' : ''} onclick="pick(${i})">
+      <span class="opt-label">${LABELS[i]}.</span>
+      <span class="opt-text">${opt}</span>
+      ${icon}
+    </button>`;
+  }).join('');
+
+  container.innerHTML = `<div class="q-card">
+    <div class="q-header">
+      <span class="q-number">Pregunta ${current + 1} / ${QS.length}</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="options" style="margin-top:1.25rem">${optsHtml}</div>
+  </div>`;
+}
+
+function pick(i) {
+  if (answers[current] !== null) return;
+  answers[current] = i;
+  render();
+  const allDone = answers.every(a => a !== null);
+  if (!allDone && current < QS.length - 1) {
+    setTimeout(() => { current++; render(); }, 1000);
+  } else if (allDone) {
+    setTimeout(() => { render(); }, 800);
+  }
+}
+
+function go(dir) {
+  current = Math.max(0, Math.min(QS.length - 1, current + dir));
+  render();
+}
+
+function showResults() {
+  const total = QS.length;
+  const ok = countCorrect();
+  const ko = total - ok;
+  const pct = Math.round(ok / total * 100);
+
+  document.getElementById('prog-label').textContent = `${total} de ${total} respondidas`;
+  document.getElementById('prog-pct').textContent = '100%';
+  document.getElementById('prog-fill').style.width = '100%';
+
+  document.getElementById('res-emoji').textContent = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+  document.getElementById('res-score').textContent = `${ok}/${total}`;
+  document.getElementById('res-sub').textContent = `${pct}% de aciertos`;
+  document.getElementById('res-ok').textContent = ok;
+  document.getElementById('res-ko').textContent = ko;
+
+  let reviewHtml = '';
+  const errors = order.filter((qi, pos) => answers[pos] !== null && answers[pos] !== QS[qi].correct);
+  if (errors.length > 0) {
+    reviewHtml = `<div class="review-title">Repasa estos errores (${errors.length})</div>`;
+    order.forEach((qi, pos) => {
+      if (answers[pos] !== null && answers[pos] !== QS[qi].correct) {
+        reviewHtml += `<div class="review-item">
+          <div class="review-q">${pos + 1}. ${QS[qi].q}</div>
+          <div class="review-a ko">✗ Tu respuesta: ${QS[qi].opts[answers[pos]]}</div>
+          <div class="review-a ok">✓ Correcta: ${QS[qi].opts[QS[qi].correct]}</div>
+        </div>`;
+      }
+    });
+  }
+  document.getElementById('review').innerHTML = reviewHtml;
+  document.getElementById('results').classList.add('show');
+}
+
+function restart() {
+  answers = new Array(QS.length).fill(null);
+  current = 0;
+  if (mode === 'rnd') order = shuffle([...QS.map((_, i) => i)]);
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('nav-row').style.display = 'flex';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluaciones — Módulo de Redes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #171b26;
+    --surface2: #1e2333;
+    --border: #2a2f42;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --success: #34d399;
+    --success-dim: rgba(52,211,153,0.10);
+    --text: #e8eaf2;
+    --text-muted: #6b7494;
+    --text-dim: #4a5070;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --radius: 10px;
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+  body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem 5rem; }
+
+  header { width: 100%; max-width: 680px; margin-bottom: 3rem; }
+  .header-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  h1 { font-size: 30px; font-weight: 600; color: var(--text); letter-spacing: -0.025em; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+  .divider { width: 100%; max-width: 680px; height: 1px; background: var(--border); margin-bottom: 3rem; }
+
+  .cards { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 16px; }
+
+  .eval-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; display: flex; align-items: center; gap: 1.5rem; transition: border-color 0.2s, background 0.2s; text-decoration: none; color: inherit; cursor: default; position: relative; overflow: hidden; }
+  .eval-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--accent-dim) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .eval-card.available { cursor: pointer; }
+  .eval-card.available:hover { border-color: var(--accent); }
+  .eval-card.available:hover::before { opacity: 1; }
+  .eval-card.locked { opacity: 0.55; }
+
+  .num { font-family: var(--mono); font-size: 28px; font-weight: 500; color: var(--text-dim); min-width: 52px; text-align: center; flex-shrink: 0; transition: color 0.2s; }
+  .eval-card.available:hover .num { color: var(--accent); }
+
+  .sep { width: 1px; background: var(--border); align-self: stretch; flex-shrink: 0; }
+
+  .card-body { flex: 1; }
+  .card-tag { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .card-title { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; margin-bottom: 4px; }
+  .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+
+  .badge { flex-shrink: 0; display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: var(--mono); padding: 5px 12px; border-radius: 20px; border: 1px solid; }
+  .badge.soon { color: var(--text-dim); border-color: var(--border); background: transparent; }
+  .badge.ready { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .badge.soon .badge-dot { background: var(--text-dim); }
+  .badge.ready .badge-dot { background: var(--accent); animation: pulse 2s infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .arrow { font-size: 20px; color: var(--text-dim); flex-shrink: 0; transition: color 0.2s, transform 0.2s; }
+  .eval-card.available:hover .arrow { color: var(--accent); transform: translateX(4px); }
+
+  footer { margin-top: 4rem; font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; text-align: center; }
+
+  @media (max-width: 520px) {
+    h1 { font-size: 22px; }
+    .eval-card { flex-wrap: wrap; gap: 1rem; }
+    .num { min-width: auto; font-size: 22px; }
+    .sep { display: none; }
+    .arrow { display: none; }
+    .badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Módulo de Redes</div>
+  <h1>Evaluaciones <span>del curso</span></h1>
+  <p class="subtitle">Selecciona una evaluación para comenzar el test interactivo</p>
+</header>
+
+<div class="divider"></div>
+
+<div class="cards">
+
+  <!-- 1ª Evaluación -->
+  <a class="eval-card available" href="html/1evaluacion.html">
+    <span class="num">01</span>
+    <div class="sep"></div>
+    <div class="card-body">
+      <div class="card-tag">1ª Evaluación</div>
+      <div class="card-title">Fundamentos de redes y modelos OSI/TCP</div>
+      <div class="card-desc">Topologías, tipos de red, medios de transmisión, modelo OSI, TCP/IP y direccionamiento básico.</div>
+    </div>
+    <div class="badge ready"><span class="badge-dot"></span>Disponible</div>
+    <span class="arrow">→</span>
+  </a>
+
+  <!-- 2ª Evaluación -->
+  <a class="eval-card available" href="html/2evaluacion.html">
+    <span class="num">02</span>
+    <div class="sep"></div>
+    <div class="card-body">
+      <div class="card-tag">2ª Evaluación</div>
+      <div class="card-title">Enrutamiento, switching y VLANs</div>
+      <div class="card-desc">Protocolos de enrutamiento dinámico, spanning tree, VLANs, trunking y segmentación de redes.</div>
+    </div>
+    <div class="badge ready"><span class="badge-dot"></span>Disponible</div>
+    <span class="arrow">→</span>
+  </a>
+
+  <!-- 3ª Evaluación -->
+  <a class="eval-card available" href="html/3evaluacion.html">
+    <span class="num">03</span>
+    <div class="sep"></div>
+    <div class="card-body">
+      <div class="card-tag">3ª Evaluación</div>
+      <div class="card-title">Redes inalámbricas, WLC y seguridad</div>
+      <div class="card-desc">WLAN, WiFi 5, MIMO, CAPWAP, controladores, ACLs, SNMP y configuración de puntos de acceso.</div>
+    </div>
+    <div class="badge ready"><span class="badge-dot"></span>Disponible</div>
+    <span class="arrow">→</span>
+  </a>
+
+</div>
+
+<footer>MÓDULO DE REDES · 2024–2025</footer>
+
+</body>
+</html>
